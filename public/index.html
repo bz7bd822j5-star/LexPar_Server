@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LexPar IA v2 — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header>
+    <h1>LexPar IA v2 — Préfecture de Police</h1>
+  </header>
+
+  <div class="search-bar">
+    <input id="searchInput" type="text" placeholder="Recherche (rue, type, date...)" />
+  </div>
+
+  <div class="filters">
+    <button id="btnAll" class="active">Tout</button>
+    <button id="btnTravaux">Travaux</button>
+    <button id="btnTerrasses">Terrasses</button>
+    <button id="btnBovp">BOVP PP</button>
+    <button id="btnUpdate" class="update">🔄 Mise à jour</button>
+  </div>
+
+  <main id="cardsContainer"></main>
+
+  <footer>
+    <p>© Préfecture de Police — LexPar IA v2</p>
+  </footer>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
