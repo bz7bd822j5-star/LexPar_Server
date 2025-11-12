@@ -11,7 +11,7 @@ import fs from "fs";
 import path from "path";
 
 // --- Services internes ---
-import { syncAllDataSources } from "../services/dataIntegrator.js";
+import { syncAllDataSources } from "./dataIntegrator.js";
 
 const router = express.Router();
 
