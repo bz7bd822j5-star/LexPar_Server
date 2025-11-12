@@ -1,6 +1,8 @@
 // =====================================================
-// 📡 ROUTE RECHERCHE_ALL.JS - LexPar IA v2
-// Objectif : fusionner toutes les sources (BOVP PP + BOVP Ville + Travaux + Terrasses)
+// 🧠 LEXPAR SERVER - ROUTE RECHERCHE ALL (Render-compatible)
+// Objectif : fusionner toutes les sources JSON (BOVP, Ville, ParisData)
+// Auteur : Nono & Christophe
+// Date : 2025-11-12
 // =====================================================
 
 import express from "express";
@@ -8,58 +10,55 @@ import fs from "fs";
 import path from "path";
 
 const router = express.Router();
-const DATA_DIR = "./data";
 
-// =====================================================
-// 1️⃣ Fonction utilitaire - Chargement JSON sécurisé
-// =====================================================
-function loadJSON(file) {
+const DATA_PATHS = {
+  bovpPP: path.resolve("data/arretes_cache.json"),
+  bovpVille: path.resolve("data/bovp_ville.json"),
+  parisData: path.resolve("data/parisdata_clean.json"),
+  travaux: path.resolve("data/paris_travaux_clean.json"),
+  terrasses: path.resolve("data/paris_terrasses_clean.json"),
+};
+
+// ==============================
+// 🧩 FONCTION : Lecture sécurisée
+// ==============================
+function safeReadJSON(filePath) {
   try {
-    const fullPath = path.join(DATA_DIR, file);
-    if (!fs.existsSync(fullPath)) return [];
-    const content = fs.readFileSync(fullPath, "utf8");
+    if (!fs.existsSync(filePath)) {
+      console.warn(`⚠️ Fichier manquant : ${filePath}`);
+      return [];
+    }
+    const content = fs.readFileSync(filePath, "utf8");
     return JSON.parse(content);
   } catch (err) {
-    console.error(`❌ Erreur lors du chargement de ${file} :`, err.message);
+    console.error(`❌ Erreur lecture JSON ${filePath} :`, err.message);
     return [];
   }
 }
 
-// =====================================================
-// 2️⃣ Route principale : /api/recherche_all
-// =====================================================
-router.get("/", (req, res) => {
+// ==============================
+// 📡 ROUTE PRINCIPALE
+// ==============================
+router.get("/", async (req, res) => {
   console.log("📡 Fusion de toutes les données pour le Dashboard...");
 
-  // --- Chargement des fichiers locaux ---
-  const bovpPP = loadJSON("bovp_prefecture.json");      // Préfecture de Police
-  const bovpVille = loadJSON("bovp_ville.json");        // Ville de Paris
-  const travaux = loadJSON("paris_travaux_clean.json"); // Travaux perturbants
-  const terrasses = loadJSON("paris_terrasses_clean.json"); // Terrasses / étalages
+  const dataPP = safeReadJSON(DATA_PATHS.bovpPP);
+  const dataVille = safeReadJSON(DATA_PATHS.bovpVille);
+  const dataParis = safeReadJSON(DATA_PATHS.parisData);
+  const dataTravaux = safeReadJSON(DATA_PATHS.travaux);
+  const dataTerrasses = safeReadJSON(DATA_PATHS.terrasses);
 
-  // --- Vérification rapide des volumes ---
-  console.log(`   📘 BOVP PP : ${bovpPP.length}`);
-  console.log(`   🏛️ BOVP Ville : ${bovpVille.length}`);
-  console.log(`   🏗️ Travaux : ${travaux.length}`);
-  console.log(`   ☕ Terrasses : ${terrasses.length}`);
-
-  // --- Fusion complète ---
-  const fusion = [
-    ...bovpPP.map(x => ({ ...x, source: "BOVP - Préfecture de Police" })),
-    ...bovpVille.map(x => ({ ...x, source: "BOVP - Ville de Paris" })),
-    ...travaux.map(x => ({ ...x, source: "ParisData - Travaux" })),
-    ...terrasses.map(x => ({ ...x, source: "ParisData - Terrasses" })),
+  // 🧠 Fusion totale
+  const allData = [
+    ...dataPP,
+    ...dataVille,
+    ...dataParis,
+    ...dataTravaux,
+    ...dataTerrasses,
   ];
 
-  // --- Résumé console ---
-  console.log(`✅ Fusion réussie : ${fusion.length} éléments envoyés`);
-
-  // --- Réponse au client ---
-  res.json({
-    ok: true,
-    count: fusion.length,
-    results: fusion
-  });
+  console.log(`✅ Fusion réussie : ${allData.length} éléments envoyés`);
+  res.json({ ok: true, count: allData.length, results: allData });
 });
 
 export default router;
